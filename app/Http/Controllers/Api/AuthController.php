@@ -16,8 +16,6 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|unique:users|max:255',
             'password' => 'required|string|min:8|confirmed',
-            'phone' => 'nullable|string|max:20',
-            'type' => 'required|in:admin,user',
         ]);
 
         if ($validator->fails()) {
@@ -28,12 +26,6 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'phone' => $request->phone,
-            'type' => $request->type,
-            'status' => 'active',
-            'registration_date' => now(),
-            'approved_at' => $request->type === 'admin' ? now() : null,
-            'approved_by' => $request->type === 'admin' ? 1 : null,
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -59,10 +51,6 @@ class AuthController extends Controller
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
-        }
-
-        if ($user->status !== 'active') {
-            return response()->json(['message' => 'Your account is not active'], 403);
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
