@@ -7,6 +7,7 @@ use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use App\Models\Vote;
 
 class PostController extends Controller
 {
@@ -45,7 +46,6 @@ class PostController extends Controller
             'slug' => Str::slug($request->title),
             'description' => $request->description,
             'category' => $request->category,
-            'vote_count' => 0
         ]);
 
         return response()->json(['message' => 'Post created', 'post' => $post], 201);
@@ -102,5 +102,21 @@ class PostController extends Controller
         $post->delete();
 
         return response()->json(['message' => 'Post deleted']);
+    }
+
+    public function votes(string $slug)
+    {
+        $post = Post::where('slug', $slug)->firstOrFail();
+
+        $votes = Vote::where('post_id', $post->id)
+            ->selectRaw('SUM(CASE WHEN type = 1 THEN 1 ELSE 0 END) as upvotes')
+            ->selectRaw('SUM(CASE WHEN type = -1 THEN 1 ELSE 0 END) as downvotes')
+            ->first();
+
+        return response()->json([
+            'upvotes' => (int) $votes->upvotes,
+            'downvotes' => (int) $votes->downvotes,
+            'post_votes' => $votes->upvotes - $votes->downvotes
+        ]);
     }
 }

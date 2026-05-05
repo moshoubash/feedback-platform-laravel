@@ -12,7 +12,6 @@ class Post extends Model
         'slug',
         'description',
         'category',
-        'vote_count',
     ];
 
     public function user()

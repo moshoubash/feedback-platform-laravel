@@ -34,7 +34,8 @@ class VoteController extends Controller
             'message' => 'Vote cast successfully',
             'vote' => $vote,
             'upvotes' => (int) $counts->upvotes,
-            'downvotes' => (int) $counts->downvotes
+            'downvotes' => (int) $counts->downvotes,
+            'post_votes' => $counts->upvotes - $counts->downvotes
         ]);
     }
 

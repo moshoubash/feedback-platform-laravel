@@ -9,19 +9,23 @@ use App\Http\Controllers\Api\VoteController;
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('logout', [AuthController::class, 'logout']);
-    Route::get('profile', [AuthController::class, 'profile']);
-});
-
 // Posts Routes
-Route::post('posts', [PostController::class, 'store']);
 Route::get('posts', [PostController::class, 'index']);
 Route::get('posts/{slug}', [PostController::class, 'show']);
-Route::put('posts/{slug}', [PostController::class, 'update']);
-Route::delete('posts/{slug}', [PostController::class, 'destroy']);
+Route::get('posts/{slug}/votes', [PostController::class, 'votes']);
 
-// Votes Routes
-Route::post('posts/{postId}/vote', [VoteController::class, 'vote']);
-Route::post('posts/{postId}/upvote', [VoteController::class, 'upvote']);
-Route::post('posts/{postId}/downvote', [VoteController::class, 'downvote']);
+Route::middleware('auth:sanctum')->group(function () {
+    // Auth Routes
+    Route::post('logout', [AuthController::class, 'logout']);
+    Route::get('profile', [AuthController::class, 'profile']);
+
+    // Post Routes
+    Route::post('posts', [PostController::class, 'store']);
+    Route::put('posts/{slug}', [PostController::class, 'update']);
+    Route::delete('posts/{slug}', [PostController::class, 'destroy']);
+
+    // Vote Routes
+    Route::post('posts/{postId}/vote', [VoteController::class, 'vote']);
+    Route::patch('posts/{postId}/upvote', [VoteController::class, 'upvote']);
+    Route::patch('posts/{postId}/downvote', [VoteController::class, 'downvote']);
+});

@@ -17,7 +17,6 @@ return new class extends Migration {
             $table->string('slug')->unique();
             $table->text('description');
             $table->string('category')->index();
-            $table->integer('vote_count')->default(0);
             $table->timestamps();
         });
     }
