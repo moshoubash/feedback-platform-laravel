@@ -40,7 +40,7 @@ class PostController extends Controller
         ]);
 
         return response()->json([
-            'message' => 'Post created', 
+            'message' => 'Post created',
             'post' => new PostResource($post)
         ], 201);
     }
@@ -59,7 +59,10 @@ class PostController extends Controller
             ->where('slug', $slug)
             ->firstOrFail();
 
-        return new PostResource($post);
+        return response()->json([
+            'post' => new PostResource($post),
+            'post_votes' => $post->upvotes - $post->downvotes,
+        ]);
     }
 
     public function update(UpdatePostRequest $request, string $slug)
@@ -73,7 +76,7 @@ class PostController extends Controller
         $post->update($request->validated());
 
         return response()->json([
-            'message' => 'Post updated', 
+            'message' => 'Post updated',
             'post' => new PostResource($post)
         ]);
     }
