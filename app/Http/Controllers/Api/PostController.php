@@ -3,9 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StorePostRequest;
+use App\Http\Requests\UpdatePostRequest;
+use App\Http\Resources\PostResource;
 use App\Models\Post;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use App\Models\Vote;
 
@@ -25,21 +26,11 @@ class PostController extends Controller
             ->latest()
             ->paginate(10);
 
-        return response()->json($posts);
+        return PostResource::collection($posts);
     }
 
-    public function store(Request $request)
+    public function store(StorePostRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'title' => 'required|string|min:3|max:255',
-            'description' => 'required|string|min:10',
-            'category' => 'required|string|in:Feature,Bug,Question,Improvement'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
-        }
-
         $post = Post::create([
             'user_id' => auth()->id(),
             'title' => $request->title,
@@ -48,7 +39,10 @@ class PostController extends Controller
             'category' => $request->category,
         ]);
 
-        return response()->json(['message' => 'Post created', 'post' => $post], 201);
+        return response()->json([
+            'message' => 'Post created', 
+            'post' => new PostResource($post)
+        ], 201);
     }
 
     public function show(string $slug)
@@ -65,10 +59,10 @@ class PostController extends Controller
             ->where('slug', $slug)
             ->firstOrFail();
 
-        return response()->json($post);
+        return new PostResource($post);
     }
 
-    public function update(Request $request, string $slug)
+    public function update(UpdatePostRequest $request, string $slug)
     {
         $post = Post::where('slug', $slug)->firstOrFail();
 
@@ -76,19 +70,12 @@ class PostController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        $validator = Validator::make($request->all(), [
-            'title' => 'sometimes|string|min:3|max:255',
-            'description' => 'sometimes|string|min:10',
-            'category' => 'sometimes|string|in:Feature,Bug,Question,Improvement'
+        $post->update($request->validated());
+
+        return response()->json([
+            'message' => 'Post updated', 
+            'post' => new PostResource($post)
         ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
-        }
-
-        $post->update($validator->validated());
-
-        return response()->json(['message' => 'Post updated', 'post' => $post]);
     }
 
     public function destroy(string $slug)
