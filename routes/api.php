@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\VoteController;
+use App\Http\Controllers\Api\UserController;
 
 Route::middleware('throttle:auth')->group(function () {
     Route::post('register', [AuthController::class, 'register']);
@@ -21,6 +22,13 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     // Auth
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('profile', [AuthController::class, 'profile']);
+
+    // User Management
+    Route::get('users', [UserController::class, 'index']);
+    Route::get('users/{user}', [UserController::class, 'show']);
+    Route::get('users/{user}/posts', [UserController::class, 'showWithPosts']);
+    Route::put('users/{user}', [UserController::class, 'update']);
+    Route::delete('users/{user}', [UserController::class, 'destroy']);
 
     // Posts (write)
     Route::post('posts', [PostController::class, 'store']);
