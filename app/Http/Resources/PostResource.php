@@ -20,10 +20,6 @@ class PostResource extends JsonResource
             'slug' => $this->slug,
             'description' => $this->description,
             'category' => $this->category,
-            'upvotes' => $this->whenCounted('upvotes'),
-            'downvotes' => $this->whenCounted('downvotes'),
-            'user_voted' => $this->when(isset($this->user_voted), $this->user_voted),
-            'user' => new UserResource($this->whenLoaded('user')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
