@@ -23,8 +23,8 @@ class PostController extends Controller
                 'votes as user_voted' => fn($q) =>
                     $q->where('user_id', auth()->id())
             ])
-            ->latest()
-            ->paginate(10);
+            ->with('votes')
+            ->get();
 
         return PostResource::collection($posts);
     }

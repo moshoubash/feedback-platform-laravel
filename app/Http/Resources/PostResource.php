@@ -14,6 +14,11 @@ class PostResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $upvotes = $this->votes->where('type', 1)->count();
+        $downvotes = $this->votes->where('type', -1)->count();
+        $total_votes = $upvotes - $downvotes;
+        $total_votes = $total_votes <= 0 ? 0 : $total_votes;
+
         return [
             'id' => $this->id,
             'title' => $this->title,
@@ -22,6 +27,9 @@ class PostResource extends JsonResource
             'category' => $this->category,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'upvotes' => $upvotes,
+            'downvotes' => $downvotes,
+            'total_votes' => $total_votes,
         ];
     }
 }
