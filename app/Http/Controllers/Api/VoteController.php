@@ -16,6 +16,19 @@ class VoteController extends Controller
 
         $type = $request->type === 'up' ? 1 : -1;
 
+        $existingVote = Vote::where('user_id', auth()->id())->where('post_id', $post->id)->first();
+
+        if ($existingVote && $existingVote->type === $type) {
+            $existingVote->delete();
+            return response()->json([
+                'message' => 'Vote removed successfully',
+                'vote' => null,
+                'upvotes' => $post->upvotes,
+                'downvotes' => $post->downvotes,
+                'post_votes' => $post->total_votes
+            ]);
+        }
+
         $vote = Vote::updateOrCreate(
             [
                 'user_id' => auth()->id(),
@@ -25,17 +38,15 @@ class VoteController extends Controller
         );
 
         // Recalculate votes count
-        $counts = Vote::where('post_id', $post->id)
-            ->selectRaw('SUM(CASE WHEN type = 1 THEN 1 ELSE 0 END) as upvotes')
-            ->selectRaw('SUM(CASE WHEN type = -1 THEN 1 ELSE 0 END) as downvotes')
-            ->first();
+        $upvotes = Vote::where('post_id', $post->id)->where('type', 1)->count();
+        $downvotes = Vote::where('post_id', $post->id)->where('type', -1)->count();
 
         return response()->json([
             'message' => 'Vote cast successfully',
             'vote' => $vote,
-            'upvotes' => (int) $counts->upvotes,
-            'downvotes' => (int) $counts->downvotes,
-            'post_votes' => $counts->upvotes - $counts->downvotes
+            'upvotes' => (int) $upvotes,
+            'downvotes' => (int) $downvotes,
+            'post_votes' => $upvotes - $downvotes
         ]);
     }
 
