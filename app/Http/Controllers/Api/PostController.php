@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 use App\Http\Resources\PostResource;
+use App\Http\Resources\PostResourceAuth;
 use App\Models\Post;
 use Illuminate\Support\Str;
 use App\Models\Vote;
@@ -18,10 +19,6 @@ class PostController extends Controller
             ->withCount([
                 'votes as upvotes' => fn($q) => $q->where('type', 1),
                 'votes as downvotes' => fn($q) => $q->where('type', -1),
-            ])
-            ->withExists([
-                'votes as user_voted' => fn($q) =>
-                    $q->where('user_id', auth()->id())
             ])
             ->with('votes')
             ->get();
@@ -108,5 +105,22 @@ class PostController extends Controller
             'downvotes' => (int) $votes->downvotes,
             'post_votes' => $votes->upvotes - $votes->downvotes
         ]);
+    }
+
+    public function getPostsForAuthenticatedUsers()
+    {
+        $posts = Post::with('user:id,name')
+            ->withCount([
+                'votes as upvotes' => fn($q) => $q->where('type', 1),
+                'votes as downvotes' => fn($q) => $q->where('type', -1),
+            ])
+            ->withExists([
+                'votes as user_voted' => fn($q) =>
+                    $q->where('user_id', auth()->user()->id)
+            ])
+            ->with('votes')
+            ->get();
+
+        return PostResourceAuth::collection($posts);
     }
 }

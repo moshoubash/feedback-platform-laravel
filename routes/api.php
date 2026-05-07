@@ -12,6 +12,10 @@ Route::middleware('throttle:auth')->group(function () {
     Route::post('login', [AuthController::class, 'login']);
 });
 
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('posts/get-posts-for-authenticated-users', [PostController::class, 'getPostsForAuthenticatedUsers']);
+});
+
 Route::middleware('throttle:api')->group(function () {
     Route::get('posts', [PostController::class, 'index']);
     Route::get('posts/{slug}', [PostController::class, 'show']);
